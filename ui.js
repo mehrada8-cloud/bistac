@@ -32,6 +32,7 @@ async function runProbes(){
 }
 
 (async function init(){
+  try{ await runProbes(); }catch(e){}
   try {
     const v = await window.raoof.appVersion();
     $('#version').textContent = 'v' + v;
@@ -90,31 +91,30 @@ async function runProbes(){
   };
 
   // Launch admin in webview
-  const webview = $('#modalView');
+  const webview = $('#view');
+  const overlay = $('#loadingOverlay');
+const modal = document.getElementById('adminModal');
+const modalClose = document.getElementById('modalClose');
+const modalFullscreen = document.getElementById('modalFullscreen');
+if (modalClose) modalClose.onclick = () => { modal.classList.add('hidden'); try { webview.loadURL('about:blank'); } catch(e){} };
+if (modalFullscreen) modalFullscreen.onclick = () => { modal.classList.toggle('fullscreen'); };
 
-  // Modal controls
-  const modal = document.getElementById('adminModal');
-  const modalClose = document.getElementById('modalClose');
-  const modalFullscreen = document.getElementById('modalFullscreen');
-  modalClose.onclick = () => { modal.classList.add('hidden'); try { webview.loadURL('about:blank'); } catch(e){} };
-  modalFullscreen.onclick = () => { modal.classList.toggle('fullscreen'); };
-
-  // WebView events
+if (webview) {
   webview.addEventListener('did-start-loading', () => {
     overlay.classList.remove('hidden');
-    document.getElementById('modalStatus').textContent = 'در حال بارگذاری...';
+    const st = document.getElementById('modalStatus'); if (st) st.textContent = 'در حال بارگذاری...';
   });
   webview.addEventListener('did-stop-loading', () => {
     overlay.classList.add('hidden');
-    document.getElementById('modalStatus').textContent = 'آماده';
+    const st = document.getElementById('modalStatus'); if (st) st.textContent = 'آماده';
   });
   webview.addEventListener('did-fail-load', (e) => {
     overlay.classList.add('hidden');
-    document.getElementById('modalStatus').textContent = 'خطا در بارگذاری';
-    toast({type:'error', title:'وب', msg: 'بارگذاری ناموفق: ' + (e && (e.errorDescription||e.errorCode))});
+    const st = document.getElementById('modalStatus'); if (st) st.textContent = 'خطا در بارگذاری';
+    if (typeof toast === 'function') toast({type:'error', title:'وب', msg:'بارگذاری ناموفق'});
   });
+}
 
-  const overlay = $('#loadingOverlay');
 
   let zoomFactor = 1.0;
   const applyZoom = () => webview.setZoomFactor(zoomFactor);
@@ -126,8 +126,8 @@ async function runProbes(){
   $('#launch').onclick = async () => {
     const s = await window.raoof.getSettings();
     const url = s.startUrl;
-    document.getElementById('adminModal').classList.remove('hidden');
-    // shown via modal
+    $('#placeholder').style.display = 'none';
+    webview.style.display = 'block';
     overlay.classList.remove('hidden');
     webview.src = url;
   };
