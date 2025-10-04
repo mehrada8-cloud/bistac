@@ -14,9 +14,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # اگر لاک‌فایل هست: ستاپ نود + کش
+      # اگر لاک‌فایل هست → کش npm فعال
       - name: Setup Node (with cache)
-        if: ${{ hashFiles('**/package-lock.json') != '' || hashFiles('**/npm-shrinkwrap.json') != '' || hashFiles('**/yarn.lock') != '' }}
+        if: ${{ hashFiles('**/package-lock.json','**/npm-shrinkwrap.json','**/yarn.lock') != '' }}
         uses: actions/setup-node@v4
         with:
           node-version: '20'
@@ -26,28 +26,27 @@ jobs:
             **/npm-shrinkwrap.json
             **/yarn.lock
 
-      # اگر لاک‌فایل نیست: ستاپ نود بدون کش
+      # اگر لاک‌فایل نیست → بدون کش
       - name: Setup Node (no cache)
-        if: ${{ hashFiles('**/package-lock.json') == '' && hashFiles('**/npm-shrinkwrap.json') == '' && hashFiles('**/yarn.lock') == '' }}
+        if: ${{ hashFiles('**/package-lock.json','**/npm-shrinkwrap.json','**/yarn.lock') == '' }}
         uses: actions/setup-node@v4
         with:
           node-version: '20'
 
-      # نصب وابستگی‌ها: با ci اگر لاک‌فایل هست، وگرنه install
+      # نصب وابستگی‌ها: npm install (اجازه می‌دهد lock به‌صورت درجا تکمیل شود)
       - name: Install dependencies
-        shell: pwsh
-        run: |
-          if (Test-Path "package-lock.json" -or Test-Path "npm-shrinkwrap.json") {
-            npm ci
-          } else {
-            npm install
-          }
+        shell: bash
+        run: npm install
+        # working-directory: .   # اگر پروژه در زیرپوشه است این را تنظیم کن
 
       - name: Build
+        shell: bash
         run: npm run dist
+        # working-directory: .
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: windows-installer
           path: dist/**
+          if-no-files-found: error
