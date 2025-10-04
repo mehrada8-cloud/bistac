@@ -14,26 +14,20 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # ستاپ نود بدون کش
       - name: Setup Node (no cache)
         uses: actions/setup-node@v4
         with:
           node-version: '20'
           check-latest: true
 
-      # پاک کردن همه‌ی کش‌ها (npm + electron + electron-builder)
+      # پاکسازی کش‌های احتمالی داخلیِ runner برای بیلد کاملاً تازه
       - name: Purge caches (npm & electron & electron-builder)
         shell: pwsh
         run: |
-          echo "Node version:"; node -v
-          echo "NPM version:"; npm -v
-
-          # Clean npm cache (global path shown by 'npm config get cache')
           $npmCache = (npm config get cache)
-          if (Test-Path $npmCache) { Remove-Item -Recurse -Force $npmCache } 
+          if (Test-Path $npmCache) { Remove-Item -Recurse -Force $npmCache }
           npm cache clean --force
 
-          # Common Windows cache locations for electron/electron-builder
           $paths = @(
             "$env:LOCALAPPDATA\electron\Cache",
             "$env:LOCALAPPDATA\electron-builder\Cache",
@@ -42,29 +36,25 @@ jobs:
           )
           foreach ($p in $paths) { if (Test-Path $p) { Remove-Item -Recurse -Force $p } }
 
-          # اطمینان از عدم وجود کش در مسیرهای موقتی
           $env:ELECTRON_BUILDER_CACHE = "$env:RUNNER_TEMP\eb-cache"
           $env:ELECTRON_CACHE = "$env:RUNNER_TEMP\electron-cache"
           New-Item -ItemType Directory -Force -Path $env:ELECTRON_BUILDER_CACHE | Out-Null
           New-Item -ItemType Directory -Force -Path $env:ELECTRON_CACHE | Out-Null
 
-      # نصب وابستگی‌ها (می‌تونی npm ci یا npm install انتخاب کنی)
-      - name: Install dependencies
+      # نصب تازه؛ لاک‌فایل اگر هست هم اجازه آپدیت می‌ده
+      - name: Install dependencies (fresh)
         shell: bash
-        run: |
-          if [ -f package-lock.json ] || [ -f npm-shrinkwrap.json ] || [ -f yarn.lock ]; then
-            npm ci
-          else
-            npm install
-          fi
+        run: npm install --no-audit --no-fund
+        # اگر پروژه‌ات در زیرپوشه است، اضافه کن:
+        # working-directory: app
 
       - name: Build
         shell: bash
         env:
-          # مسیرهای کش را به مسیر موقت ست می‌کنیم تا حتی اگر ابزاری بخواهد کش بسازد، فقط در temp آن run باشد
           ELECTRON_BUILDER_CACHE: ${{ runner.temp }}/eb-cache
           ELECTRON_CACHE: ${{ runner.temp }}/electron-cache
         run: npm run dist
+        # working-directory: app
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
@@ -72,3 +62,5 @@ jobs:
           name: windows-installer-${{ github.run_number }}-${{ github.sha }}
           path: dist/**
           if-no-files-found: error
+          # اگر زیرپوشه داری:
+          # path: app/dist/**
