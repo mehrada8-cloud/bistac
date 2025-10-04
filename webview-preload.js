@@ -1,2 +1,2 @@
-// webview-preload.js
-(() => { console.log('[webview-preload] ready'); })();
+// minimal webview preload
+(()=>{console.log('[webview-preload] ready')})();

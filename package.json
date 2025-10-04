@@ -1,6 +1,6 @@
 {
   "name": "raoof-admin-shell",
-  "version": "2.4.2",
+  "version": "2.4.3",
   "description": "Glass UI shell for raoofictc.com with collapsible sidebar, web fullscreen, probes, toasts, whitelist, cache boost, and Persian font.",
   "main": "main.js",
   "author": "you",

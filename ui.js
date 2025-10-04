@@ -91,14 +91,13 @@ async function runProbes(){
   };
 
   // Launch admin in webview
-  const webview = $('#view');
+  const webview = $('#modalView');
   const overlay = $('#loadingOverlay');
 const modal = document.getElementById('adminModal');
 const modalClose = document.getElementById('modalClose');
 const modalFullscreen = document.getElementById('modalFullscreen');
-if (modalClose) modalClose.onclick = () => { modal.classList.add('hidden'); try { webview.loadURL('about:blank'); } catch(e){} };
+if (modalClose) modalClose.onclick = () => { modal.classList.add('hidden'); try{ webview.loadURL('about:blank'); }catch(e){} };
 if (modalFullscreen) modalFullscreen.onclick = () => { modal.classList.toggle('fullscreen'); };
-
 if (webview) {
   webview.addEventListener('did-start-loading', () => {
     overlay.classList.remove('hidden');
@@ -108,10 +107,10 @@ if (webview) {
     overlay.classList.add('hidden');
     const st = document.getElementById('modalStatus'); if (st) st.textContent = 'آماده';
   });
-  webview.addEventListener('did-fail-load', (e) => {
+  webview.addEventListener('did-fail-load', () => {
     overlay.classList.add('hidden');
     const st = document.getElementById('modalStatus'); if (st) st.textContent = 'خطا در بارگذاری';
-    if (typeof toast === 'function') toast({type:'error', title:'وب', msg:'بارگذاری ناموفق'});
+    if (typeof toast==='function') toast({type:'error', title:'وب', msg:'بارگذاری ناموفق'});
   });
 }
 

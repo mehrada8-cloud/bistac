@@ -99,6 +99,26 @@ function createMain() {
     {
       label: 'App',
       submenu: [
+        {
+          label: 'Clear User Data & Restart',
+          click: async () => {
+            try {
+              await session.defaultSession.clearCache();
+              await session.defaultSession.clearStorageData({});
+              const cookies = await session.defaultSession.cookies.get({});
+              for (const c of cookies) {
+                try {
+                  await session.defaultSession.cookies.remove((c.secure?'https':'http')+'://' + c.domain.replace(/^\./,'' ) + c.path, c.name);
+                } catch {}
+              }
+              app.relaunch();
+              app.exit(0);
+            } catch (e) {
+              dialog.showErrorBox('Purge Error', String(e));
+            }
+          }
+        },
+        { type: 'separator' },
         { role: 'reload', accelerator: 'Ctrl+R' },
         { role: 'forcereload' },
         { type: 'separator' },
@@ -198,6 +218,24 @@ async function probeHost(hostname='raoofictc.com') {
   }
   return result;
 }
+
+
+ipcMain.handle('app:purge-and-relaunch', async () => {
+  try {
+    const ses = session.defaultSession;
+    await ses.clearCache();
+    await ses.clearStorageData({});
+    const cookies = await ses.cookies.get({});
+    for (const c of cookies) {
+      try {
+        await ses.cookies.remove((c.secure?'https':'http')+'://' + c.domain.replace(/^\./,'' ) + c.path, c.name);
+      } catch {}
+    }
+    app.relaunch();
+    app.exit(0);
+    return { ok: true };
+  } catch (e) { return { ok:false, error: String(e) }; }
+});
 
 ipcMain.handle('net:probe', async (_e, startUrl) => {
   let usesHTTPS = false;

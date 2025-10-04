@@ -9,3 +9,10 @@ contextBridge.exposeInMainWorld('raoof', {
   toggleFull: () => ipcRenderer.invoke('win:toggleFull'),
   netProbe: (startUrl) => ipcRenderer.invoke('net:probe', startUrl)
 });
+
+
+try {
+  contextBridge.exposeInMainWorld('raoofMaintenance', {
+    purgeAndRelaunch: () => ipcRenderer.invoke('app:purge-and-relaunch')
+  });
+} catch {}
