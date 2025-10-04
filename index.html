@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Raoof Admin Shell</title>
+  <link rel="stylesheet" href="ui.css"></head>
+<body>
+  <div id="app" class="app">
+  <button id="sidebarToggle" class="floating-toggle icon-btn" title="نمایش/مخفی منو">☰</button>
+  <div class="grid" id="layout">
+    <aside class="panel glass" id="sidebar">
+      <div class="brand">
+        <img src="logo.png" alt="logo"/>
+        <div class="titles">
+          <h1>RAOOFICTC</h1>
+          <p>Car Tuning Center</p>
+        </div>
+      </div>
+
+      <div class="group">
+        <label>آدرس شروع</label>
+        <div class="row">
+          <input id="startUrl" type="text" placeholder="https://raoofictc.com/wp-admin"/>
+          <button id="saveUrl" class="btn">ذخیره</button>
+        </div>
+        <small class="muted">قابل تغییر برای هر اپراتور</small>
+      </div>
+
+      <div class="group actions">
+        <button id="launch" class="btn primary">ورود به پنل ادمین</button>
+        <button id="full" class="btn">تمام‌صفحه (F11)</button>
+        <button id="webFull" class="btn">وب فول‌اسکرین</button>
+        <button id="zoomIn" class="btn">Zoom +</button>
+        <button id="zoomOut" class="btn">Zoom −</button>
+        <button id="resetZoom" class="btn">Reset Zoom</button>
+        <button id="clearCache" class="btn">پاک‌سازی کش</button>
+        <button id="devtools" class="btn ghost">DevTools</button>
+        <button id="quit" class="btn danger">خروج</button>
+      </div>
+
+      <div class="foot muted">
+        <button id="toggleSidebar" class="btn ghost">☰ جمع/نمایش</button>
+        <span id="version">v</span>
+      </div>
+    </aside>
+
+    <main class="workspace glass" id="workspace">
+      <div id="placeholder">
+        <div class="hero">
+          <img src="logo.png" alt="logo"/>
+          <h2>به پنل رائوف خوش آمدید</h2>
+          <p>برای شروع، «ورود به پنل ادمین» را بزنید.</p>
+        </div>
+      </div>
+
+      <div id="loadingOverlay" class="overlay hidden">
+        <div class="spinner">
+          <img src="logo.png" alt="logo">
+          <div class="ring"></div>
+          <div class="txt">در حال بارگذاری...</div>
+        </div>
+      </div>
+      <div id="web-placeholder" class="web-placeholder">
+        <div class="placeholder-inner">
+          <h2>پنجره ادمین هنوز باز نشده است</h2>
+          <p>برای شروع، «ورود به پنل ادمین» را بزنید.</p>
+        </div>
+      </div></main>
+  </div>
+
+  <div id="toaster" class="toaster"></div>
+
+  <script src="ui.js"></script>
+</div>
+<div id="adminModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="adminTitle">
+    <div class="modal-backdrop"></div>
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <div class="modal-title">
+          <span id="adminTitle">RAOOFICTC Admin</span>
+          <span id="modalStatus" class="status">...</span>
+        </div>
+        <div class="modal-actions">
+          <button id="modalFullscreen" class="icon-btn" title="تمام‌صفحه">⛶</button>
+          <button id="modalClose" class="icon-btn" title="بستن">✕</button>
+        </div>
+      </div>
+      <div class="modal-body">
+        <div id="loadingOverlay" class="overlay"><div class="spinner"><div class="ring"></div><div class="txt">در حال بارگذاری...</div></div></div>
+        <webview id="modalView"
+                 src="about:blank"
+                 allowpopups
+                 disableblinkfeatures="Auxclick"
+                 preload="./webview-preload.js"></webview>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

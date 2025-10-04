@@ -1,0 +1,39 @@
+{
+  "name": "raoof-admin-shell",
+  "version": "2.4.1",
+  "description": "Glass UI shell for raoofictc.com with collapsible sidebar, web fullscreen, probes, toasts, whitelist, cache boost, and Persian font.",
+  "main": "main.js",
+  "author": "you",
+  "license": "MIT",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder --windows nsis --publish never"
+  },
+  "build": {
+    "appId": "com.example.raoofadmin",
+    "productName": "Raoof Admin Shell",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "**/*",
+      "!dist/**/*"
+    ],
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowElevation": true,
+      "allowToChangeInstallationDirectory": true,
+      "artifactName": "Raoof-Admin-Setup-${version}.exe"
+    },
+    "win": {
+      "target": [
+        "nsis"
+      ]
+    }
+  },
+  "devDependencies": {
+    "electron": "^30.0.0",
+    "electron-builder": "^24.13.3"
+  }
+}
