@@ -2,29 +2,51 @@ name: Build Windows exe
 
 on:
   push:
-    branches: [ main, master ]
+    branches: [ "main" ]
+    tags: [ "v*" ]
   workflow_dispatch:
 
 jobs:
   build-windows:
     runs-on: windows-latest
-    timeout-minutes: 45
-    env:
-      START_URL: https://raoofictc.com/wp-admin
 
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # اگر لاک‌فایل هست: ستاپ نود + کش
+      - name: Setup Node (with cache)
+        if: ${{ hashFiles('**/package-lock.json') != '' || hashFiles('**/npm-shrinkwrap.json') != '' || hashFiles('**/yarn.lock') != '' }}
+        uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
+          cache-dependency-path: |
+            **/package-lock.json
+            **/npm-shrinkwrap.json
+            **/yarn.lock
+
+      # اگر لاک‌فایل نیست: ستاپ نود بدون کش
+      - name: Setup Node (no cache)
+        if: ${{ hashFiles('**/package-lock.json') == '' && hashFiles('**/npm-shrinkwrap.json') == '' && hashFiles('**/yarn.lock') == '' }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # نصب وابستگی‌ها: با ci اگر لاک‌فایل هست، وگرنه install
       - name: Install dependencies
+        shell: pwsh
         run: |
-          npm config set fund false audit false
-          npm install
-      - name: Build Windows installer (NSIS)
-        run: npx electron-builder --windows nsis --publish never
-      - name: Upload artifact
+          if (Test-Path "package-lock.json" -or Test-Path "npm-shrinkwrap.json") {
+            npm ci
+          } else {
+            npm install
+          }
+
+      - name: Build
+        run: npm run dist
+
+      - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: windows-installer
