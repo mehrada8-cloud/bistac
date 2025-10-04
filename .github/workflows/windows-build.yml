@@ -1,4 +1,4 @@
-name: Build Windows exe
+name: Build Windows exe (fresh, no cache)
 
 on:
   push:
@@ -14,39 +14,61 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # اگر لاک‌فایل هست → کش npm فعال
-      - name: Setup Node (with cache)
-        if: ${{ hashFiles('**/package-lock.json','**/npm-shrinkwrap.json','**/yarn.lock') != '' }}
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
-          cache-dependency-path: |
-            **/package-lock.json
-            **/npm-shrinkwrap.json
-            **/yarn.lock
-
-      # اگر لاک‌فایل نیست → بدون کش
+      # ستاپ نود بدون کش
       - name: Setup Node (no cache)
-        if: ${{ hashFiles('**/package-lock.json','**/npm-shrinkwrap.json','**/yarn.lock') == '' }}
         uses: actions/setup-node@v4
         with:
           node-version: '20'
+          check-latest: true
 
-      # نصب وابستگی‌ها: npm install (اجازه می‌دهد lock به‌صورت درجا تکمیل شود)
+      # پاک کردن همه‌ی کش‌ها (npm + electron + electron-builder)
+      - name: Purge caches (npm & electron & electron-builder)
+        shell: pwsh
+        run: |
+          echo "Node version:"; node -v
+          echo "NPM version:"; npm -v
+
+          # Clean npm cache (global path shown by 'npm config get cache')
+          $npmCache = (npm config get cache)
+          if (Test-Path $npmCache) { Remove-Item -Recurse -Force $npmCache } 
+          npm cache clean --force
+
+          # Common Windows cache locations for electron/electron-builder
+          $paths = @(
+            "$env:LOCALAPPDATA\electron\Cache",
+            "$env:LOCALAPPDATA\electron-builder\Cache",
+            "$env:USERPROFILE\AppData\Local\electron\Cache",
+            "$env:USERPROFILE\AppData\Local\electron-builder\Cache"
+          )
+          foreach ($p in $paths) { if (Test-Path $p) { Remove-Item -Recurse -Force $p } }
+
+          # اطمینان از عدم وجود کش در مسیرهای موقتی
+          $env:ELECTRON_BUILDER_CACHE = "$env:RUNNER_TEMP\eb-cache"
+          $env:ELECTRON_CACHE = "$env:RUNNER_TEMP\electron-cache"
+          New-Item -ItemType Directory -Force -Path $env:ELECTRON_BUILDER_CACHE | Out-Null
+          New-Item -ItemType Directory -Force -Path $env:ELECTRON_CACHE | Out-Null
+
+      # نصب وابستگی‌ها (می‌تونی npm ci یا npm install انتخاب کنی)
       - name: Install dependencies
         shell: bash
-        run: npm install
-        # working-directory: .   # اگر پروژه در زیرپوشه است این را تنظیم کن
+        run: |
+          if [ -f package-lock.json ] || [ -f npm-shrinkwrap.json ] || [ -f yarn.lock ]; then
+            npm ci
+          else
+            npm install
+          fi
 
       - name: Build
         shell: bash
+        env:
+          # مسیرهای کش را به مسیر موقت ست می‌کنیم تا حتی اگر ابزاری بخواهد کش بسازد، فقط در temp آن run باشد
+          ELECTRON_BUILDER_CACHE: ${{ runner.temp }}/eb-cache
+          ELECTRON_CACHE: ${{ runner.temp }}/electron-cache
         run: npm run dist
-        # working-directory: .
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: windows-installer
+          name: windows-installer-${{ github.run_number }}-${{ github.sha }}
           path: dist/**
           if-no-files-found: error
