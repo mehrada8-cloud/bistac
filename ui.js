@@ -46,7 +46,31 @@ async function runProbes(){
     if (e.key === 'Enter') $('#launch').click();
   });
 
-  $('#saveUrl').onclick = async () => {
+  
+  // Launch button: open admin URL in modal webview (fallback to default if empty)
+  $('#launch').onclick = async () => {
+    try {
+      const settingsNow = await window.raoof.getSettings();
+      let url = (startUrlInput.value || settingsNow.startUrl || '').trim();
+      if (!/^https?:\/\//i.test(url)) {
+        url = 'https://raoofictc.com/wp-admin';
+      }
+      try { new URL(url); } catch { url = 'https://raoofictc.com/wp-admin'; }
+      // Persist if user typed a new one
+      if (startUrlInput.value && startUrlInput.value.trim() && startUrlInput.value.trim() !== settingsNow.startUrl) {
+        await window.raoof.setSetting('startUrl', startUrlInput.value.trim());
+      }
+      modal.classList.remove('hidden');
+      if (overlay) overlay.classList.remove('hidden');
+      const st = document.getElementById('modalStatus'); if (st) st.textContent = 'در حال بارگذاری...';
+      if (webview && webview.loadURL) {
+        try { webview.loadURL(url); } catch { webview.src = url; }
+      }
+    } catch (e) {
+      toast({type:'error', title:'خطای راه‌اندازی', msg: String(e)});
+    }
+  };
+$('#saveUrl').onclick = async () => {
     const v = startUrlInput.value.trim();
     if(!/^https?:\/\//i.test(v)) return toast({type:'error', title:'خطا', msg:'آدرس باید با http/https شروع شود.'});
     await window.raoof.setSetting('startUrl', v);
@@ -92,7 +116,7 @@ async function runProbes(){
 
   // Launch admin in webview
   const webview = $('#modalView');
-  const overlay = $('#loadingOverlay');
+  const overlay = $('#modalOverlay');
 const modal = document.getElementById('adminModal');
 const modalClose = document.getElementById('modalClose');
 const modalFullscreen = document.getElementById('modalFullscreen');
@@ -164,12 +188,12 @@ if (webview) {
       const state = document.body.classList.contains('sidebar-collapsed');
       if (window.toast) { toast({type:'info', title:'منو', msg: state ? 'منو بسته شد.' : 'منو باز شد.'}); }
       // Force a relayout so <webview> redraws correctly
-      const vw = document.getElementById('view');
+      const vw = document.getElementById('modalView');
       if (vw && vw.reload) { try { vw.reload(); } catch(e){} }
     });
   }
   // Ensure webview fills parent
-  const vw = document.getElementById('view');
+  const vw = document.getElementById('modalView');
   if (vw) {
     const fit = () => { vw.style.height = `${vw.parentElement.clientHeight}px`; };
     window.addEventListener('resize', fit);

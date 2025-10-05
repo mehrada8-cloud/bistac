@@ -75,6 +75,17 @@ function createMain() {
     shell.openExternal(url);
     return { action: 'deny' };
   });
+  // Prevent in-app navigation to non-whitelisted hosts
+  mainWin.webContents.on('will-navigate', (event, url) => {
+    try {
+      const host = new URL(url).hostname.toLowerCase();
+      if (!ALLOW_HOSTS.has(host)) {
+        event.preventDefault();
+        shell.openExternal(url);
+      }
+    } catch {}
+  });
+
 
   mainWin.webContents.on('will-navigate', (e, url) => {
     try {

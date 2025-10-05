@@ -3,6 +3,7 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src https://raoofictc.com https://www.raoofictc.com;">
   <title>Raoof Admin Shell</title>
   <link rel="stylesheet" href="ui.css"></head>
 <body>
@@ -54,7 +55,7 @@
         </div>
       </div>
 
-      <div id="loadingOverlay" class="overlay hidden">
+      <div id="modalOverlay" class="overlay hidden">
         <div class="spinner">
           <img src="logo.png" alt="logo">
           <div class="ring"></div>
@@ -89,10 +90,10 @@
         </div>
       </div>
       <div class="modal-body">
-        <div id="loadingOverlay" class="overlay hidden">
+        <div id="modalOverlay" class="overlay hidden">
           <div class="spinner"><div class="ring"></div><div class="txt">در حال بارگذاری...</div></div>
         </div>
-        <webview id="modalView" src="about:blank" allowpopups disableblinkfeatures="Auxclick" preload="./webview-preload.js"></webview>
+        <webview id="modalView" src="about:blank" allowpopups disableblinkfeatures="Auxclick" preload="./webview-preload.js"></webview></webview>
       </div>
     </div>
   </div>
