@@ -1,7 +1,6 @@
 <!doctype html>
 <html lang="fa" dir="rtl">
-\1
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src https://raoofictc.com https://www.raoofictc.com;">
+<head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>Raoof Admin Shell</title>
@@ -41,8 +40,7 @@
       </div>
 
       <div class="foot muted">
-        <button id="toggleSidebar" class="btn ghost">☰ جمع/نمایش</button>
-        <span id="version">v</span>
+        <!-- removed: toggleSidebar duplicate --><span id="version">v</span>
       </div>
     </aside>
 
@@ -82,7 +80,7 @@
       <div class="modal-header">
         <div class="modal-title">
           <span id="adminTitle">RAOOFICTC Admin</span>
-          <span id="modalStatus" class="status">...</span>
+          <span id="modalStatus" class="status"> </span>
         </div>
         <div class="modal-actions">
           <button id="modalFullscreen" class="icon-btn" title="تمام‌صفحه">⛶</button>
@@ -90,27 +88,12 @@
         </div>
       </div>
       <div class="modal-body">
-        <div id="loadingOverlay" class="overlay hidden">
+        <div id="modalOverlay" class="overlay hidden">
           <div class="spinner"><div class="ring"></div><div class="txt">در حال بارگذاری...</div></div>
         </div>
         <webview id="modalView" src="about:blank" allowpopups disableblinkfeatures="Auxclick" preload="./webview-preload.js"></webview>
       </div>
     </div>
   </div>
-
-<!-- Modal container (added) -->
-<div id="modal" class="modal hidden">
-  <div class="modal-body">
-    <div id="modalOverlay" class="overlay hidden">
-      <div class="spinner"><div class="ring"></div><div class="txt">در حال بارگذاری...</div></div>
-    </div>
-    <div class="modal-header">
-      <span id="modalStatus">آماده</span>
-      <button id="modalClose" class="icon-btn" aria-label="Close">&times;</button>
-    </div>
-    <webview id="modalView" src="about:blank" allowpopups disableblinkfeatures="Auxclick" preload="./webview-preload.js"></webview>
-  </div>
-</div>
-
 </body>
 </html>
